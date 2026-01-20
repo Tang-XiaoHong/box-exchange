@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魂魄宝箱兑换商城</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入 GitHub Corners -->
+    <link rel="stylesheet" href="https://unpkg.com/github-corners/dist/github-corners.css">
+    <script src="https://unpkg.com/github-corners/dist/github-corners.min.js"></script>
+</head>
+<body>
+    <!-- GitHub 仓库链接 -->
+    <github-corner href="https://github.com/你的用户名/box-exchange" target="_blank"></github-corner>
+    
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chess-rook"></i>
+                    <h1>魂魄<span>宝箱</span>兑换商城</h1>
+                    <span class="github-badge">GitHub Pages 部署</span>
+                </div>
+                <div class="user-info">
+                    <span>账号: <span id="user-id">未登录</span></span>
+                    <span>魂魄积分: <span id="user-points">0</span></span>
+                    <button id="login-btn" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i>登录/注册
+                    </button>
+                    <button id="logout-btn" class="btn btn-danger" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i>退出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <main>
+            <div class="content">
+                <!-- 部署状态提示 -->
+                <div class="deploy-status">
+                    <i class="fas fa-cloud"></i>
+                    <span>当前部署平台: GitHub Pages | 数据存储: LocalStorage + GitHub Issues 备份</span>
+                </div>
+                
+                <h2><i class="fas fa-gem"></i>宝箱兑换</h2>
+                <p>每周只能购买一个宝箱，战功宝箱和至尊宝箱二选一</p>
+                
+                <div class="box-grid">
+                    <div class="box-card premium">
+                        <div class="box-header">
+                            <div class="box-title">至尊宝箱</div>
+                            <div class="box-badge">尊享限量</div>
+                        </div>
+                        <div class="box-cost">
+                            <i class="fas fa-coins"></i>20000 魂魄
+                        </div>
+                        <div class="box-stock" id="premium-stock">剩余: 5/10</div>
+                        <div class="box-description">
+                            • 兑换后需间隔1周方可再次兑换<br>
+                            • 每周一上午10点开启兑换<br>
+                            • 数量有限，先到先得
+                        </div>
+                        <button class="btn btn-danger btn-exchange" data-box="premium">
+                            <i class="fas fa-crown"></i>兑换至尊宝箱
+                        </button>
+                    </div>
+                    
+                    <div class="box-card">
+                        <div class="box-header">
+                            <div class="box-title">战功宝箱</div>
+                            <div class="box-badge">常规兑换</div>
+                        </div>
+                        <div class="box-cost">
+                            <i class="fas fa-coins"></i>6000 魂魄
+                        </div>
+                        <div class="box-stock" id="regular-stock">剩余: 18/30</div>
+                        <div class="box-description">
+                            • 每周兑换数量根据剩余数量为主<br>
+                            • 无名次限制，所有玩家均可参与<br>
+                            • 与至尊宝箱兑换互不冲突
+                        </div>
+                        <button class="btn btn-warning btn-exchange" data-box="regular">
+                            <i class="fas fa-shield-alt"></i>兑换战功宝箱
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- GitHub Issues 数据状态 -->
+                <div class="github-status">
+                    <h3><i class="fab fa-github"></i>数据存储状态</h3>
+                    <p>用户数据保存在浏览器中，重要操作会备份到 GitHub Issues</p>
+                    <button id="backup-data" class="btn btn-secondary">
+                        <i class="fas fa-database"></i>手动备份到 GitHub
+                    </button>
+                    <button id="sync-data" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i>从 GitHub 同步
+                    </button>
+                    <span id="sync-status"></span>
+                </div>
+                
+                <!-- 兑换记录 -->
+                <div class="exchange-history">
+                    <h3><i class="fas fa-history"></i>兑换记录</h3>
+                    <div class="table-container">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>宝箱类型</th>
+                                    <th>消耗积分</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-body">
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">暂无兑换记录</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 管理员入口 -->
+                <div class="admin-link">
+                    <a href="admin.html" class="btn btn-admin">
+                        <i class="fas fa-user-shield"></i>管理员入口
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <h2><i class="fas fa-user-circle"></i>用户信息</h2>
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span>账号状态</span>
+                        <span class="stat-value" id="status-text">未登录</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>本周可兑换</span>
+                        <span class="stat-value" id="available-text">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>至尊宝箱冷却</span>
+                        <span class="stat-value" id="cooldown-text">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>本周已兑换</span>
+                        <span class="stat-value" id="exchanged-text">无</span>
+                    </div>
+                </div>
+                
+                <!-- GitHub 数据统计 -->
+                <div class="github-stats">
+                    <h3><i class="fas fa-chart-bar"></i>数据统计</h3>
+                    <div class="stat-item">
+                        <span>本地用户数</span>
+                        <span class="stat-value" id="local-users">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>GitHub 备份数</span>
+                        <span class="stat-value" id="github-backups">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>总兑换次数</span>
+                        <span class="stat-value" id="total-exchanges">0</span>
+                    </div>
+                </div>
+                
+                <!-- 倒计时 -->
+                <div class="countdown">
+                    <div>至尊宝箱兑换开启倒计时</div>
+                    <div class="countdown-timer" id="countdown-timer">00:00:00</div>
+                    <div class="countdown-note">每周一上午10:00开启</div>
+                </div>
+                
+                <!-- 部署信息 -->
+                <div class="deploy-info">
+                    <h3><i class="fas fa-info-circle"></i>部署信息</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> 托管平台：GitHub Pages</li>
+                        <li><i class="fas fa-check-circle"></i> 访问地址：https://你的用户名.github.io/box-exchange</li>
+                        <li><i class="fas fa-check-circle"></i> SSL 证书：自动启用</li>
+                        <li><i class="fas fa-check-circle"></i> 数据存储：LocalStorage + GitHub 备份</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="footer-content">
+                <p>魂魄宝箱兑换系统 &copy; 2023 | 基于 GitHub Pages 部署</p>
+                <div class="github-links">
+                    <a href="https://github.com/你的用户名/box-exchange" target="_blank">
+                        <i class="fab fa-github"></i> 查看源代码
+                    </a>
+                    <a href="https://github.com/你的用户名/box-exchange/issues" target="_blank">
+                        <i class="fas fa-bug"></i> 报告问题
+                    </a>
+                    <a href="#" id="export-data">
+                        <i class="fas fa-download"></i> 导出数据
+                    </a>
+                </div>
+                <p class="footer-note">数据保存在您的浏览器中，清除浏览器数据将丢失本地记录</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 登录/注册模态框 -->
+    <div class="modal" id="login-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">用户登录 / 注册</div>
+                <button class="close-modal" id="close-login">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="message" id="login-message"></div>
+                <div class="form-group">
+                    <label for="account">账号 (7位数字)</label>
+                    <input type="text" id="account" class="form-control" placeholder="请输入7位数字账号" maxlength="7">
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" class="form-control" placeholder="请输入密码">
+                </div>
+                <div class="form-group" id="confirm-password-group" style="display: none;">
+                    <label for="confirm-password">确认密码</label>
+                    <input type="password" id="confirm-password" class="form-control" placeholder="请再次输入密码">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="submit-login">登录</button>
+                    <button class="btn btn-success" id="switch-register">注册新账号</button>
+                </div>
+                <div class="modal-tips">
+                    <p><i class="fas fa-info-circle"></i> 提示：数据保存在浏览器本地，建议定期备份到 GitHub</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 兑换确认模态框 -->
+    <div class="modal" id="exchange-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="exchange-title">确认兑换</div>
+                <button class="close-modal" id="close-exchange">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="message" id="exchange-message"></div>
+                <div id="exchange-details">
+                    <p>您将要兑换：<strong id="exchange-box-name">至尊宝箱</strong></p>
+                    <p>所需积分：<strong id="exchange-box-cost">20000</strong> 魂魄</p>
+                    <p>您的当前积分：<strong id="exchange-user-points">0</strong> 魂魄</p>
+                    <p>兑换后剩余积分：<strong id="exchange-remaining-points">0</strong> 魂魄</p>
+                    <div class="modal-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        注意：每周只能兑换一个宝箱，兑换后不可更改
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancel-exchange">取消</button>
+                    <button class="btn btn-danger" id="confirm-exchange">确认兑换</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/github-api.js"></script>
+</body>
+</html>
